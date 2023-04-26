@@ -14,47 +14,44 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Theme from "../../Theme";
 import { StatusBar } from "expo-status-bar";
-import { ref, onValue, push, remove } from "firebase/database";
+import { ref, onValue, push } from "firebase/database";
 import { db } from "../../../config/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function TodoHome({navigation}) {
-    const [loading, setLoading] = useState(true);
-    const [categoryList, setCategoryList] = useState([]);
-    const [categoryName, setCategoryName] = useState('');
+export default function TodoHome({ navigation }) {
+  const [loading, setLoading] = useState(true);
+  const [categoryList, setCategoryList] = useState([]);
+  const [categoryName, setCategoryName] = useState("");
 
-    const getCategoryList = async () => {
-      const userUID = await AsyncStorage.getItem("uid");
-      const dbRef = ref(db, `users/${userUID}/categories`);
-      onValue(dbRef, (snapshot) => {
-        const categories = [];
-        snapshot.forEach((childSnapshot) => {
-          categories.push(childSnapshot.val());
-        });
-        setCategoryList(categories);
-        setLoading(false); 
+  const getCategoryList = async () => {
+    const userUID = await AsyncStorage.getItem("uid");
+    const dbRef = ref(db, `users/${userUID}/categories`);
+    onValue(dbRef, (snapshot) => {
+      const categories = [];
+      snapshot.forEach((childSnapshot) => {
+        const categoryId = childSnapshot.key;
+        const categoryData = childSnapshot.val();
+        categories.push({ id: categoryId, ...categoryData });
       });
-    };
+      setCategoryList(categories);
+      setLoading(false);
+    });
+  };
 
-    useEffect(() => {
-      getCategoryList();
-    }, []);
-
-
-    const handleAddCategory = async () => {
-      const userUID = await AsyncStorage.getItem("uid");
-      if (categoryName.trim()) {
-        push(ref(db, `users/${userUID}/categories`), {
-          name: categoryName,
-          subcategories: []
-        });
-        setCategoryName('');
-      } else {
-        alert('Category name cannot be empty');
-      }
-    };
-
-
+  useEffect(() => {
+    getCategoryList();
+  }, []);
+  const handleAddCategory = async () => {
+    const userUID = await AsyncStorage.getItem("uid");
+    if (categoryName.trim()) {
+      push(ref(db, `users/${userUID}/categories`), {
+        name: categoryName,
+      });
+      setCategoryName("");
+    } else {
+      alert("Category name cannot be empty");
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
@@ -69,7 +66,7 @@ export default function TodoHome({navigation}) {
         {categoryList.map((item, index) => (
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate("CategoryTodo", { title: item.name })
+              navigation.navigate("CategoryTodo", { category: item })
             }
             key={index}
             style={styles.note}
@@ -110,11 +107,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Theme.backgroundColor,
   },
-  footerContainer: {
-  },
+  footerContainer: {},
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Theme.backgroundColor,
     borderRadius: 30,
     padding: 10,
@@ -131,10 +127,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     color: "#fff",
     marginRight: 8,
-    fontSize:18
+    fontSize: 18,
   },
-  noteWrapper:{
-    padding:25
+  noteWrapper: {
+    padding: 25,
   },
   note: {
     backgroundColor: Theme.lightBlackColor,
@@ -142,12 +138,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
-  heading:{
+  heading: {
     fontSize: 30,
     fontWeight: "bold",
     color: "#FFF",
-    paddingHorizontal:25,
-    paddingTop:35
+    paddingHorizontal: 25,
+    paddingTop: 35,
   },
   sendButton: {
     backgroundColor: Theme.primaryColor,
@@ -158,4 +154,3 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
-

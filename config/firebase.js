@@ -1,7 +1,6 @@
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-
 // const firebaseConfig = {
 //   apiKey: "AIzaSyDaZHLVF_uPDXOdMvOIlRwWcxyFcxLSlGg",
 //   authDomain: "todoapp-78af4.firebaseapp.com",
